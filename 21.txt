@@ -1,0 +1,15 @@
+storyweaver/
+├── backend/                 # Python FastAPI backend
+│   ├── main.py             # Main application with ADK agent
+│   ├── requirements.txt    # Python dependencies
+│   └── Dockerfile          # Container configuration
+├── frontend/               # Next.js frontend
+│   ├── pages/              # Next.js pages
+│   ├── components/         # React components
+│   ├── store/              # Zustand state management
+│   └── public/             # Static assets
+├── infrastructure/         # Terraform configurations
+│   ├── main.tf            # GCP infrastructure
+│   └── variables.tf       # Terraform variables
+├── scripts/                # Deployment scripts
+└── README.md              # This file

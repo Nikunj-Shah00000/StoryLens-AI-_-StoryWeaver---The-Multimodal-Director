@@ -1,0 +1,35 @@
+
+## 🚀 Technologies Used
+
+### Google Cloud Platform
+- **Vertex AI**: Gemini 1.5 Pro for narrative generation
+- **Imagen**: High-quality image generation
+- **Veo**: Video generation for key moments
+- **Cloud Run**: Serverless container hosting
+- **Cloud Storage**: Asset storage and serving
+- **Firestore**: Session and metadata storage
+- **Cloud Redis**: Real-time session management
+- **Cloud Logging**: Monitoring and debugging
+
+### Frontend
+- **Next.js 14**: React framework
+- **Tailwind CSS**: Styling
+- **Framer Motion**: Smooth animations
+- **WebSocket**: Real-time communication
+- **Zustand**: State management
+
+## 📋 Prerequisites
+
+- Google Cloud Platform account with billing enabled
+- Node.js 18+ and npm
+- Python 3.11+
+- Docker (for local container builds)
+- gcloud CLI installed and configured
+- Terraform (for infrastructure deployment)
+
+## 🔧 Setup Instructions
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/yourusername/storyweaver.git
+cd storyweaver
