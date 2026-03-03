@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StoryWeaver - The Multimodal Director</title>
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Framer Motion via ESM -->
+    <script type="module">
+        import { motion } from 'https://esm.sh/framer-motion@10.16.5';
+        window.motion = motion;
+    </script>
+    
+    <style>
+        * {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0c1f 0%, #1a1435 50%, #2d1b3a 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Animated background grid */
+        .grid-bg {
+            background-image: 
+                linear-gradient(rgba(168, 85, 247, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(168, 85, 247, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        /* Floating orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: float 20s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 30px) scale(0.9); }
+        }
+        
+        /* Glowing text effect */
+        .glow-text {
+            text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+        }
+        
+        /* Animated gradient border */
+        .gradient-border {
+            position: relative;
+            border: double 1px transparent;
+            border-radius: 1rem;
+            background-image: linear-gradient(#1a1435, #1a1435), 
+                radial-gradient(circle at 30% 30%, #a855f7, #ec4899);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            animation: borderRotate 4s linear infinite;
+        }
+        
+        @keyframes borderRotate {
+            from { filter: hue-rotate(0deg); }
+            to { filter: hue-rotate(360deg); }
+        }
+        
+        /* Typing animation */
+        .typing-demo {
+            width: 22ch;
+            animation: typing 3s steps(22), blink .5s step-end infinite alternate;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 3px solid;
+        }
+        
+        @keyframes typing {
+            from { width: 0; }
+        }
+        
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(168, 85, 247, 0.1);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #a855f7, #ec4899);
+            border-radius: 10px;
+        }
+        
+        /* Card hover effects */
+        .hover-glow {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-glow:hover {
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
+            transform: translateY(-5px);
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(168, 85, 247, 0.3);
+            border-top-color: #a855f7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Particle effect */
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: particleFloat 10s linear infinite;
+        }
+        
+        @keyframes particleFloat {
+            from {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(-100vh) scale(1);
+                opacity: 0.5;
+            }
+        }
+    </style>
+</head>
+<body class="relative">
+    <!-- Particle Background -->
+    <div id="particles" class="fixed inset-0 pointer-events-none"></div>
+    
+    <!-- Floating Orbs -->
+    <div class="orb w-96 h-96 bg-purple-600 top-20 left-20"></div>
+    <div class="orb w-96 h-96 bg-pink-600 bottom-20 right-20"></div>
+    <div class="orb w-64 h-64 bg-blue-600 top-40 right-40"></div>
+    
+    <!-- Main Container -->
+    <div class="relative z-10 container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-12 relative">
+            <!-- Animated logo -->
+            <div class="relative inline-block">
+                <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur-3xl opacity-30 animate-pulse"></div>
+                <h1 class="text-7xl font-black relative">
+                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 glow-text">
+                        StoryWeaver
+                    </span>
+                </h1>
+            </div>
+            <p class="text-xl text-purple-200/80 max-w-2xl mx-auto mt-4 typing-demo mx-auto">
+                Your AI Creative Director
+            </p>
+            <p class="text-purple-300/60 mt-2 text-sm">
+                Weave text, images, and video into immersive narratives
+            </p>
+            
+            <!-- Status indicator -->
+            <div class="flex items-center justify-center mt-4 space-x-2">
+                <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <span class="text-green-300 text-sm">Connected to Gemini Live API</span>
+            </div>
+        </header>
+        
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Left Panel - Director's Console -->
+            <div class="lg:col-span-1">
+                <div class="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-6 shadow-2xl hover-glow">
+                    <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                        <i class="fas fa-magic text-purple-400 mr-2"></i>
+                        Director's Console
+                    </h2>
+                    
+                    <form id="storyForm">
+                        <div class="mb-6">
+                            <label class="block text-purple-200 mb-2 text-sm">Your Vision</label>
+                            <textarea 
+                                id="promptInput"
+                                placeholder="Describe the story you want to tell..."
+                                class="w-full h-32 bg-slate-900/50 border border-purple-500/30 rounded-xl p-4 text-white placeholder-purple-300/50 focus:outline-none focus:border-purple-400 transition-colors"
+                            >A lone astronaut discovers an ancient civilization on a forgotten moon, where crystals pulse with mysterious energy.</textarea>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <!-- Visual Style -->
+                            <div>
+                                <label class="block text-purple-200 mb-2 text-sm flex items-center">
+                                    <i class="fas fa-palette mr-1"></i>
+                                    Visual Style
+                                </label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button type="button" onclick="setStyle('cinematic')" class="style-btn px-3 py-2 rounded-lg capitalize text-sm bg-gradient-to-r from-purple-500 to-pink-500 text-white" data-style="cinematic">
+                                        Cinematic
+                                    </button>
+                                    <button type="button" onclick="setStyle('anime')" class="style-btn px-3 py-2 rounded-lg capitalize text-sm bg-slate-700 text-purple-200 hover:bg-slate-600" data-style="anime">
+                                        Anime
+                                    </button>
+                                    <button type="button" onclick="setStyle('watercolor')" class="style-btn px-3 py-2 rounded-lg capitalize text-sm bg-slate-700 text-purple-200 hover:bg-slate-600" data-style="watercolor">
+                                        Watercolor
+                                    </button>
+                                    <button type="button" onclick="setStyle('cyberpunk')" class="style-btn px-3 py-2 rounded-lg capitalize text-sm bg-slate-700 text-purple-200 hover:bg-slate-600" data-style="cyberpunk">
+                                        Cyberpunk
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Narrative Tone -->
+                            <div>
+                                <label class="block text-purple-200 mb-2 text-sm flex items-center">
+                                    <i class="fas fa-comment mr-1"></i>
+                                    Narrative Tone
+                                </label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button type="button" onclick="setTone('mysterious')" class="tone-btn px-3 py-2 rounded-lg capitalize text-sm bg-gradient-to-r from-purple-500 to-pink-500 text-white" data-tone="mysterious">
+                                        Mysterious
+                                    </button>
+                                    <button type="button" onclick="setTone('whimsical')" class="tone-btn px-3 py-2 rounded-lg capitalize text-sm bg-slate-700 text-purple-200 hover:bg-slate-600" data-tone="whimsical">
+                                        Whimsical
+                                    </button>
+                                    <button type="button" onclick="setTone('epic')" class="tone-btn px-3 py-2 rounded-lg capitalize text-sm bg-slate-700 text-purple-200 hover:bg-slate-600" data-tone="epic">
+                                        Epic
+                                    </button>
+                                    <button type="button" onclick="setTone('suspenseful')" class="tone-btn px-3 py-2 rounded-lg capitalize text-sm bg-slate-700 text-purple-200 hover:bg-slate-600" data-tone="suspenseful">
+                                        Suspenseful
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Pacing -->
+                            <div>
+                                <label class="block text-purple-200 mb-2 text-sm flex items-center">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    Pacing
+                                </label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button type="button" onclick="setPacing('slow')" class="pace-btn px-3 py-2 rounded-lg capitalize text-sm bg-slate-700 text-purple-200 hover:bg-slate-600" data-pace="slow">
+                                        Slow
+                                    </button>
+                                    <button type="button" onclick="setPacing('balanced')" class="pace-btn px-3 py-2 rounded-lg capitalize text-sm bg-gradient-to-r from-purple-500 to-pink-500 text-white" data-pace="balanced">
+                                        Balanced
+                                    </button>
+                                    <button type="button" onclick="setPacing('fast')" class="pace-btn px-3 py-2 rounded-lg capitalize text-sm bg-slate-700 text-purple-200 hover:bg-slate-600" data-pace="fast">
+                                        Fast
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Video Toggle -->
+                            <div class="flex items-center justify-between">
+                                <span class="text-purple-200 text-sm flex items-center">
+                                    <i class="fas fa-video mr-1"></i>
+                                    Include Video
+                                </span>
+                                <button 
+                                    type="button"
+                                    onclick="toggleVideo()"
+                                    id="videoToggle"
+                                    class="w-12 h-6 rounded-full p-1 bg-purple-500"
+                                >
+                                    <div id="videoToggleDot" class="w-4 h-4 bg-white rounded-full transform translate-x-6"></div>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button 
+                            type="submit"
+                            class="w-full mt-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-purple-500/50 transition-all transform hover:scale-105"
+                        >
+                            <i class="fas fa-play mr-2"></i>
+                            Start Directing
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Main Panel - Story Flow -->
+            <div class="lg:col-span-2">
+                <div class="bg-slate-800/30 backdrop-blur-sm rounded-2xl border border-purple-500/30 p-6 h-[600px] overflow-y-auto" id="storyFlow">
+                    <div class="text-center py-12" id="welcomeMessage">
+                        <i class="fas fa-feather text-6xl text-purple-400/30 mb-4"></i>
+                        <p class="text-purple-300 text-lg">Your story will appear here...</p>
+                        <p class="text-purple-400/60 text-sm mt-2">Adjust your director's console and begin</p>
+                    </div>
+                    
+                    <!-- Story content will be dynamically added here -->
+                    <div id="storyContent" class="space-y-6"></div>
+                    
+                    <div id="scrollAnchor"></div>
+                </div>
+            </div>
+            
+            <!-- Right Panel - Controls & Assets -->
+            <div class="lg:col-span-1">
+                <div class="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-6">
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <i class="fas fa-cubes text-purple-400 mr-2"></i>
+                        Generated Assets
+                    </h3>
+                    
+                    <div class="space-y-4 max-h-[400px] overflow-y-auto" id="assetList">
+                        <div class="text-center py-8">
+                            <i class="fas fa-images text-4xl text-purple-300/30 mb-2"></i>
+                            <p class="text-purple-300/60">No assets generated yet</p>
+                            <p class="text-xs text-purple-400/40 mt-1">
+                                Images and videos will appear here
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Session Info -->
+                    <div class="mt-4 pt-4 border-t border-purple-500/30">
+                        <div class="text-xs text-purple-300/60 flex items-center justify-between">
+                            <span>Session ID:</span>
+                            <span class="font-mono" id="sessionId"> awaiting...</span>
+                        </div>
+                        <div class="flex items-center mt-2">
+                            <div class="w-2 h-2 rounded-full bg-green-400 mr-2 animate-pulse" id="connectionStatus"></div>
+                            <span class="text-xs text-purple-300/60" id="connectionText">Connected</span>
+                        </div>
+                        
+                        <!-- Live API Stats -->
+                        <div class="grid grid-cols-2 gap-2 mt-4">
+                            <div class="bg-slate-700/50 rounded-lg p-2 text-center">
+                                <div class="text-xs text-purple-300">Gemini</div>
+                                <div class="text-sm text-white font-bold" id="geminiStatus">Active</div>
+                            </div>
+                            <div class="bg-slate-700/50 rounded-lg p-2 text-center">
+                                <div class="text-xs text-purple-300">Imagen</div>
+                                <div class="text-sm text-white font-bold" id="imagenStatus">Ready</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading Overlay (hidden by default) -->
+        <div id="loadingOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+            <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl text-center">
+                <div class="spinner mx-auto mb-4"></div>
+                <p class="text-white text-lg">Weaving your story...</p>
+                <p class="text-purple-300 text-sm mt-2">Generating narrative with Gemini</p>
+            </div>
+        </div>
+        
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-8 right-8 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-4 rounded-xl shadow-xl transform transition-all duration-500 translate-y-20 opacity-0">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span id="toastMessage">Story started!</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let currentStyle = 'cinematic';
+        let currentTone = 'mysterious';
+        let currentPacing = 'balanced';
+        let includeVideo = true;
+        let sessionId = generateSessionId();
+        let storyChunks = [];
+        let assets = [];
+        let storyIndex = 0;
+        
+        // Sample story data for demonstration
+        const storyParts = [
+            {
+                type: 'text',
+                content: 'The year is 2147. Commander Elara Vance\'s ship descended through the amber clouds of Kepler-186f\'s largest moon. Below, geometric patterns emerged—ruins of a civilization that shouldn\'t exist.'
+            },
+            {
+                type: 'text',
+                content: 'The crystal spires caught the light of the red dwarf star, pulsing with an inner luminescence that seemed to respond to her presence.'
+            },
+            {
+                type: 'image',
+                url: 'https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?w=800',
+                prompt: 'Alien ruins with glowing crystals under red star',
+                alt: 'Alien ruins concept art'
+            },
+            {
+                type: 'text',
+                content: 'As she approached the central structure, the crystals began to hum—a frequency that resonated not in her ears, but in her mind. Ancient symbols flickered across their surfaces.'
+            },
+            {
+                type: 'image',
+                url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800',
+                prompt: 'Astronaut examining ancient alien technology',
+                alt: 'Astronaut discovery scene'
+            },
+            {
+                type: 'text',
+                content: '"Welcome, weaver of stars," a voice echoed in her consciousness. "We have waited eons for one who can hear the song of creation."'
+            },
+            {
+                type: 'video',
+                url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+                prompt: 'Crystal activation sequence',
+                poster: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=800'
+            },
+            {
+                type: 'text',
+                content: 'The crystals weren\'t ruins—they were a library. A repository of every civilization that had ever existed in this galaxy, waiting for someone worthy to continue the story.'
+            }
+        ];
+        
+        // Initialize particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = 10 + Math.random() * 20 + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Generate random session ID
+        function generateSessionId() {
+            return 'sess_' + Math.random().toString(36).substr(2, 9);
+        }
+        
+        // Update session display
+        document.getElementById('sessionId').textContent = sessionId.substr(0, 8) + '...';
+        
+        // Style selection
+        function setStyle(style) {
+            currentStyle = style;
+            document.querySelectorAll('.style-btn').forEach(btn => {
+                const btnStyle = btn.getAttribute('data-style');
+                if (btnStyle === style) {
+                    btn.className = 'px-3 py-2 rounded-lg capitalize text-sm bg-gradient-to-r from-purple-500 to-pink-500 text-white';
+                } else {
+                    btn.className = 'px-3 py-2 rounded-lg capitalize text-sm bg-slate-700 text-purple-200 hover:bg-slate-600';
+                }
+            });
+        }
+        
+        function setTone(tone) {
+            currentTone = tone;
+            document.querySelectorAll('.tone-btn').forEach(btn => {
+                const btnTone = btn.getAttribute('data-tone');
+                if (btnTone === tone) {
+                    btn.className = 'px-3 py-2 rounded-lg capitalize text-sm bg-gradient-to-r from-purple-500 to-pink-500 text-white';
+                } else {
+                    btn.className = 'px-3 py-2 rounded-lg capitalize text-sm bg-slate-700 text-purple-200 hover:bg-slate-600';
+                }
+            });
+        }
+        
+        function setPacing(pacing) {
+            currentPacing = pacing;
+            document.querySelectorAll('.pace-btn').forEach(btn => {
+                const btnPace = btn.getAttribute('data-pace');
+                if (btnPace === pacing) {
+                    btn.className = 'px-3 py-2 rounded-lg capitalize text-sm bg-gradient-to-r from-purple-500 to-pink-500 text-white';
+                } else {
+                    btn.className = 'px-3 py-2 rounded-lg capitalize text-sm bg-slate-700 text-purple-200 hover:bg-slate-600';
+                }
+            });
+        }
+        
+        function toggleVideo() {
+            includeVideo = !includeVideo;
+            const toggle = document.getElementById('videoToggle');
+            const dot = document.getElementById('videoToggleDot');
+            
+            if (includeVideo) {
+                toggle.className = 'w-12 h-6 rounded-full p-1 bg-purple-500';
+                dot.className = 'w-4 h-4 bg-white rounded-full transform translate-x-6';
+            } else {
+                toggle.className = 'w-12 h-6 rounded-full p-1 bg-slate-600';
+                dot.className = 'w-4 h-4 bg-white rounded-full transform translate-x-0';
+            }
+        }
+        
+        // Show toast notification
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            toast.className = 'fixed bottom-8 right-8 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-4 rounded-xl shadow-xl transform transition-all duration-500 translate-y-0 opacity-100';
+            
+            setTimeout(() => {
+                toast.className = 'fixed bottom-8 right-8 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-4 rounded-xl shadow-xl transform transition-all duration-500 translate-y-20 opacity-0';
+            }, duration);
+        }
+        
+        // Add chunk to story flow with animation
+        function addStoryChunk(chunk) {
+            const storyContent = document.getElementById('storyContent');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            const scrollAnchor = document.getElementById('scrollAnchor');
+            
+            // Hide welcome message if this is first chunk
+            if (storyChunks.length === 0) {
+                welcomeMessage.style.display = 'none';
+            }
+            
+            // Create chunk element
+            const chunkDiv = document.createElement('div');
+            chunkDiv.className = 'border-l-2 border-purple-500 pl-4 opacity-0 transform translate-x-[-20px] transition-all duration-500';
+            
+            if (chunk.type === 'text') {
+                chunkDiv.innerHTML = `
+                    <div class="prose prose-invert">
+                        <p class="text-purple-100 leading-relaxed">${chunk.content}</p>
+                    </div>
+                `;
+            } else if (chunk.type === 'image') {
+                chunkDiv.innerHTML = `
+                    <div class="my-4 rounded-xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform">
+                        <img src="${chunk.url}" alt="${chunk.alt}" class="w-full h-auto">
+                        <p class="text-sm text-purple-300 mt-2 italic">"${chunk.prompt}"</p>
+                    </div>
+                `;
+            } else if (chunk.type === 'video') {
+                chunkDiv.innerHTML = `
+                    <div class="my-4 rounded-xl overflow-hidden shadow-2xl">
+                        <video 
+                            src="${chunk.url}" 
+                            controls 
+                            autoplay 
+                            loop 
+                            muted
+                            poster="${chunk.poster}"
+                            class="w-full h-auto"
+                        ></video>
+                        <p class="text-sm text-purple-300 mt-2 italic">"${chunk.prompt}"</p>
+                    </div>
+                `;
+            }
+            
+            storyContent.appendChild(chunkDiv);
+            
+            // Trigger animation
+            setTimeout(() => {
+                chunkDiv.classList.remove('opacity-0', 'translate-x-[-20px]');
+            }, 10);
+            
+            // Scroll to bottom
+            scrollAnchor.scrollIntoView({ behavior: 'smooth' });
+            
+            // Add to assets if image or video
+            if (chunk.type === 'image' || chunk.type === 'video') {
+                addToAssets(chunk);
+            }
+        }
+        
+        // Add to assets panel
+        function addToAssets(asset) {
+            const assetList = document.getElementById('assetList');
+            
+            // Remove empty state if present
+            if (assets.length === 0) {
+                assetList.innerHTML = '';
+            }
+            
+            const assetId = 'asset_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+            assets.push({ id: assetId, ...asset });
+            
+            const assetDiv = document.createElement('div');
+            assetDiv.id = assetId;
+            assetDiv.className = 'bg-slate-700/50 rounded-lg p-3 opacity-0 transform translate-y-2 transition-all duration-500';
+            
+            assetDiv.innerHTML = `
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-purple-300 capitalize">
+                        <i class="fas fa-${asset.type === 'image' ? 'image' : 'video'} mr-1"></i>
+                        ${asset.type}
+                    </span>
+                    <div class="flex space-x-2">
+                        <button onclick="regenerateAsset('${assetId}')" class="p-1 hover:bg-slate-600 rounded transition-colors">
+                            <i class="fas fa-sync-alt text-purple-300 text-xs"></i>
+                        </button>
+                        <button onclick="downloadAsset('${asset.url}', '${asset.type}')" class="p-1 hover:bg-slate-600 rounded transition-colors">
+                            <i class="fas fa-download text-purple-300 text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                <p class="text-xs text-purple-400/70 truncate">${asset.prompt}</p>
+            `;
+            
+            assetList.appendChild(assetDiv);
+            
+            // Trigger animation
+            setTimeout(() => {
+                assetDiv.classList.remove('opacity-0', 'translate-y-2');
+            }, 10);
+        }
+        
+        // Simulate asset regeneration
+        function regenerateAsset(assetId) {
+            showToast('Regenerating asset with Imagen...');
+            
+            // Simulate regeneration delay
+            setTimeout(() => {
+                showToast('Asset regenerated!');
+            }, 2000);
+        }
+        
+        // Download asset
+        function downloadAsset(url, type) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `storyweaver-${Date.now()}.${type === 'video' ? 'mp4' : 'png'}`;
+            a.click();
+            showToast('Download started');
+        }
+        
+        // Handle form submission
+        document.getElementById('storyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const prompt = document.getElementById('promptInput').value;
+            if (!prompt.trim()) {
+                showToast('Please enter a story prompt', 2000);
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            
+            // Clear previous story
+            document.getElementById('storyContent').innerHTML = '';
+            storyChunks = [];
+            storyIndex = 0;
+            
+            // Simulate API call and streaming
+            showToast('🎬 Gemini Live API: Processing your vision...');
+            
+            // Update API status indicators
+            document.getElementById('geminiStatus').innerHTML = '<span class="text-green-400">Generating</span>';
+            document.getElementById('imagenStatus').innerHTML = '<span class="text-yellow-400">Standing by</span>';
+            
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                
+                // Start streaming story
+                streamNextChunk();
+                
+                document.getElementById('geminiStatus').innerHTML = '<span class="text-green-400">Streaming</span>';
+            }, 2000);
+        });
+        
+        // Stream story chunks with timing
+        function streamNextChunk() {
+            if (storyIndex < storyParts.length) {
+                const chunk = storyParts[storyIndex];
+                
+                // Update status based on chunk type
+                if (chunk.type === 'image') {
+                    document.getElementById('imagenStatus').innerHTML = '<span class="text-green-400">Generating</span>';
+                    showToast('🎨 Imagen: Painting your vision...');
+                    
+                    setTimeout(() => {
+                        document.getElementById('imagenStatus').innerHTML = '<span class="text-green-400">Ready</span>';
+                    }, 1500);
+                } else if (chunk.type === 'video' && includeVideo) {
+                    document.getElementById('imagenStatus').innerHTML = '<span class="text-purple-400">Rendering</span>';
+                    showToast('🎥 Veo: Creating cinematic moment...');
+                    
+                    setTimeout(() => {
+                        document.getElementById('imagenStatus').innerHTML = '<span class="text-green-400">Ready</span>';
+                    }, 2000);
+                }
+                
+                storyChunks.push(chunk);
+                addStoryChunk(chunk);
+                storyIndex++;
+                
+                // Schedule next chunk
+                const delay = currentPacing === 'fast' ? 800 : currentPacing === 'slow' ? 2000 : 1200;
+                setTimeout(streamNextChunk, delay);
+            } else {
+                showToast('✨ Story complete! You can direct another.');
+                document.getElementById('geminiStatus').innerHTML = '<span class="text-green-400">Ready</span>';
+            }
+        }
+        
+        // Initialize particles on load
+        window.onload = function() {
+            createParticles();
+            showToast('🚀 StoryWeaver ready - connected to Gemini Live API', 4000);
+            
+            // Simulate real-time updates
+            setInterval(() => {
+                const status = document.getElementById('connectionStatus');
+                status.className = 'w-2 h-2 rounded-full bg-green-400 mr-2 animate-pulse';
+            }, 3000);
+        };
+        
+        // Simulate WebSocket connection
+        setInterval(() => {
+            // Randomly update stats for demo effect
+            const random = Math.random();
+            if (random > 0.7) {
+                document.getElementById('geminiStatus').innerHTML = '<span class="text-green-400">Processing</span>';
+                setTimeout(() => {
+                    document.getElementById('geminiStatus').innerHTML = '<span class="text-green-400">Active</span>';
+                }, 1000);
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
